@@ -17,8 +17,10 @@ public class LoginDto {
     @NotNull
     private String password;
 
+    @Setter
     private String firstName;
 
+    @Setter
     private String lastName;
 
 
@@ -29,7 +31,8 @@ public class LoginDto {
 
 
     public LoginDto(String username, String password, String firstName, String lastName) {
-        this(username, password);
+        this.username = username;
+        this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
     }

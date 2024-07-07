@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User List</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<h1>User List</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Username</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+    </tr>
+    </thead>
+    <tbody id="userTableBody">
+    <!-- Users will be dynamically added here -->
+    </tbody>
+</table>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Parse query parameters to get users data
+        const params = new URLSearchParams(window.location.search);
+        const usersJson = decodeURIComponent(params.get('users'));
+
+        // Parse JSON string to array of users
+        const users = JSON.parse(usersJson);
+
+        const tableBody = document.getElementById('userTableBody');
+        tableBody.innerHTML = ''; // Clear existing rows (if any)
+
+        // Populate table with users data
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${user.username}</td><td>${user.firstName}</td><td>${user.lastName}</td>`;
+            tableBody.appendChild(row);
+        });
+    });
+</script>
+</body>
+</html>

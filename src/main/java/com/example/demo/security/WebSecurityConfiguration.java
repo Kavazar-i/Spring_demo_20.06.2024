@@ -31,17 +31,15 @@ public class WebSecurityConfiguration {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/packages/**").permitAll()
-                                .requestMatchers("/tours/**").permitAll()
-                                .requestMatchers("/ratings/**").permitAll()
+                                .requestMatchers("/users/signup").permitAll()
                                 .requestMatchers("/users/signin").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+                );
+//                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -54,8 +52,12 @@ public class WebSecurityConfiguration {
                 .requestMatchers("/swagger-ui.html")
                 .requestMatchers("/configuration/**")
                 .requestMatchers("/webjars/**")
-                .requestMatchers("/users/signin")
-                .requestMatchers("/public");
+                .requestMatchers("/public")
+                .requestMatchers("/signin.html") // Регистрация страницы
+                .requestMatchers("/signup.html")
+                .requestMatchers("/user-list.html") // Список пользователей
+                .requestMatchers("/css/**")
+                .requestMatchers("/js/**");
     }
 
     @Bean

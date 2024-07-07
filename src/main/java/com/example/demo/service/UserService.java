@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.controller.LoginDto;
 import com.example.demo.model.Role;
 import com.example.demo.model.User;
 import com.example.demo.repository.RoleRepository;
@@ -41,12 +42,15 @@ public class UserService {
     }
 
     public Optional<String> signin(String username, String password) {
-        log.info("New user attempting to sign in");
+        log.info("User attempting to sign in");
         Optional<String> token = Optional.empty();
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isPresent()) {
+            if (!password.equals(user.get().getPassword())) {
+                log.info("Log in failed for user {}", username);
+                return token;
+            }
             try {
-                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
                 token = Optional.of(jwtProvider.createToken(username, user.get().getRoles()));
             } catch (AuthenticationException e) {
                 log.info("Log in failed for user {}", username);
@@ -59,12 +63,15 @@ public class UserService {
         log.info("New user attempting to sign up");
         Optional<User> user = Optional.empty();
         if (userRepository.findByUsername(username).isEmpty()) {
-            Optional<Role> role = roleRepository.findByRoleName("ROLE_CSR");
+            Optional<Role> role = roleRepository.findByRoleName("ROLE_USER");
+            if (role.isEmpty()) {
+                role = Optional.of(roleRepository.save(new Role("ROLE_USER", "User role")));
+            }
             List<Role> listOfRoles = role.map(List::of).orElseGet(List::of);
             user = Optional.of(userRepository.save(
                     new User(
                             username,
-                            passwordEncoder.encode(password),
+                            password,
                             firstName,
                             lastName,
                             listOfRoles)));
@@ -74,5 +81,22 @@ public class UserService {
 
     public List<User> getAll() {
         return userRepository.findAll();
+    }
+
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    public User updateUser(Long id, LoginDto loginDto) {
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setUsername(loginDto.getUsername());
+            user.setPassword(passwordEncoder.encode(loginDto.getPassword()));
+            user.setFirstName(loginDto.getFirstName());
+            user.setLastName(loginDto.getLastName());
+            return userRepository.save(user);
+        }
+        throw new RuntimeException("User not found");
     }
 }

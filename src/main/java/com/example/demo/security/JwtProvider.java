@@ -2,7 +2,6 @@ package com.example.demo.security;
 
 import com.example.demo.model.Role;
 import io.jsonwebtoken.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,10 +12,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
 public class JwtProvider{
 
     private final String ROLES_KEY = "roles";
+
+    private JwtParser parser;
 
     private String secretKey;
     private long validityInMilliseconds;
@@ -29,11 +29,18 @@ public class JwtProvider{
         this.validityInMilliseconds = validityInMilliseconds;
     }
 
+    /**
+     * Create JWT string given username and roles.
+     *
+     * @param username
+     * @param roles
+     * @return jwt string
+     */
     public String createToken(String username, List<Role> roles) {
         Claims claims = Jwts.claims().setSubject(username);
         claims.put(ROLES_KEY, roles.stream().map(role ->new SimpleGrantedAuthority(role.getAuthority()))
-                                        .filter(Objects::nonNull)
-                                        .collect(Collectors.toList()));
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
         Date now = new Date();
         Date expiresAt = new Date(now.getTime() + validityInMilliseconds);
         return Jwts.builder()
@@ -44,6 +51,12 @@ public class JwtProvider{
                 .compact();
     }
 
+    /**
+     * Validate the JWT String
+     *
+     * @param token JWT string
+     * @return true if valid, false otherwise
+     */
     public boolean isValidToken(String token) {
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
@@ -53,16 +66,28 @@ public class JwtProvider{
         }
     }
 
+    /**
+     * Get the username from the token string
+     *
+     * @param token jwt
+     * @return username
+     */
     public String getUsername(String token) {
         return Jwts.parser().setSigningKey(secretKey)
                 .parseClaimsJws(token).getBody().getSubject();
     }
 
+    /**
+     * Get the roles from the token string
+     *
+     * @param token jwt
+     * @return username
+     */
     public List<GrantedAuthority> getRoles(String token) {
         List<Map<String, String>>  roleClaims = Jwts.parser().setSigningKey(secretKey)
                 .parseClaimsJws(token).getBody().get(ROLES_KEY, List.class);
         return roleClaims.stream().map(roleClaim ->
-                new SimpleGrantedAuthority(roleClaim.get("authority")))
+                        new SimpleGrantedAuthority(roleClaim.get("authority")))
                 .collect(Collectors.toList());
     }
 }
