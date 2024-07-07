@@ -29,12 +29,9 @@ public class JwtTokenFilter extends GenericFilterBean {
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
             throws IOException, ServletException {
         LOGGER.info("Process request to check for a JSON Web Token ");
-        //Check for Authorization:Bearer JWT
         String headerValue = ((HttpServletRequest)req).getHeader("Authorization");
         getBearerToken(headerValue).ifPresent(token-> {
-            //Pull the Username and Roles from the JWT to construct the user details
             userDetailsService.loadUserByJwtToken(token).ifPresent(userDetails -> {
-                //Add the user details (Permissions) to the Context for just this API invocation
                 SecurityContextHolder.getContext().setAuthentication(
                         new PreAuthenticatedAuthenticationToken(userDetails, "", userDetails.getAuthorities()));
             });

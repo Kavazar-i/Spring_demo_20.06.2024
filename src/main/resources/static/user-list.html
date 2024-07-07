@@ -17,22 +17,18 @@
     </tr>
     </thead>
     <tbody id="userTableBody">
-    <!-- Users will be dynamically added here -->
     </tbody>
 </table>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Parse query parameters to get users data
         const params = new URLSearchParams(window.location.search);
         const usersJson = decodeURIComponent(params.get('users'));
 
-        // Parse JSON string to array of users
         const users = JSON.parse(usersJson);
 
         const tableBody = document.getElementById('userTableBody');
-        tableBody.innerHTML = ''; // Clear existing rows (if any)
+        tableBody.innerHTML = '';
 
-        // Populate table with users data
         users.forEach(user => {
             const row = document.createElement('tr');
             row.innerHTML = `<td>${user.username}</td><td>${user.firstName}</td><td>${user.lastName}</td>`;
